@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Для тебя</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Segoe UI", sans-serif;
+        transition: background 1s ease;
+      }
+
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
+      }
+
+      .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        color: white;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .reveal .overlay {
+        background: none;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .message-box {
+        max-width: 90%;
+        font-size: 18px;
+        line-height: 1.6;
+        margin-bottom: 40px;
+        color: #400028;
+      }
+
+      button {
+        background-color: #ff66a5;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #e05590;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+        margin-top: 20px;
+      }
+
+      .arrow {
+        font-size: 32px;
+        background: none;
+        border: none;
+        color: #ff3399;
+        cursor: pointer;
+      }
+
+      .word-display {
+        font-size: 32px;
+        font-weight: bold;
+        min-width: 120px;
+      }
+
+      .reveal {
+        background: linear-gradient(to bottom right, #ffe0f0, #ffffff);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="rainCanvas"></canvas>
+
+    <div class="overlay" id="overlay">
+      <button onclick="startReveal()">
+        Нажми, я хочу очень открыто тебе сказать…
+      </button>
+    </div>
+
+    <div class="overlay hidden" id="content">
+      <div class="message-box">
+        Мне неприятно, что ты мне солгала. Я стараюсь быть честным. Я хочу тебе
+        и себе лучшего. Если мы будем уважительны друг к другу и честны, это
+        будет невероятный союз и правильное решение. Я знаю, ты знаешь, что мы
+        не безразличны друг другу. Мы оба считаем себя близкими, и поэтому нам
+        важно начать общаться честно, открыто и положительно.
+      </div>
+      <div class="controls">
+        <button class="arrow" onclick="prevWord()">&#x2B05;</button>
+        <div class="word-display" id="wordDisplay">ТЫ</div>
+        <button class="arrow" onclick="nextWord()">&#x27A1;</button>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("rainCanvas");
+      const ctx = canvas.getContext("2d");
+      let w = (canvas.width = window.innerWidth);
+      let h = (canvas.height = window.innerHeight);
+
+      let drops = [];
+      for (let i = 0; i < 500; i++) {
+        drops.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          l: Math.random() * 1 + 1,
+          xs: -1 + Math.random() * 2,
+          ys: Math.random() * 10 + 10,
+        });
+      }
+
+      function drawRain() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.strokeStyle = "rgba(174,194,224,0.5)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i < drops.length; i++) {
+          const d = drops[i];
+          ctx.moveTo(d.x, d.y);
+          ctx.lineTo(d.x + d.xs, d.y + d.l * d.ys);
+        }
+        ctx.stroke();
+        moveRain();
+      }
+
+      function moveRain() {
+        for (let i = 0; i < drops.length; i++) {
+          const d = drops[i];
+          d.x += d.xs;
+          d.y += d.ys;
+          if (d.y > h) {
+            d.x = Math.random() * w;
+            d.y = -20;
+          }
+        }
+      }
+
+      let animationId;
+      function animate() {
+        drawRain();
+        animationId = requestAnimationFrame(animate);
+      }
+      animate();
+      window.addEventListener("resize", () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      function startReveal() {
+        cancelAnimationFrame(animationId);
+        canvas.style.display = "none";
+        document.body.classList.add("reveal");
+        document.getElementById("overlay").classList.add("hidden");
+        document.getElementById("content").classList.remove("hidden");
+      }
+      const words = ["ТЫ", "МНЕ", "НРАВИШЬСЯ", "НАДЕЮСЬ", "ЭТО", "ВЗАИМНО"];
+      let wordIndex = 0;
+
+      function updateWord() {
+        document.getElementById("wordDisplay").textContent = words[wordIndex];
+      }
+
+      function prevWord() {
+        wordIndex = (wordIndex - 1 + words.length) % words.length;
+        updateWord();
+      }
+
+      function nextWord() {
+        wordIndex = (wordIndex + 1) % words.length;
+        updateWord();
+      }
+    </script>
+  </body>
+</html>
